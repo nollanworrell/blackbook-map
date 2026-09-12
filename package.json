@@ -1,0 +1,20 @@
+{
+  "name": "bboy-crew-genealogy-map",
+  "version": "1.0.0",
+  "description": "Bboy Crew Genealogy Map (The Blackbook Map) Backend & Frontend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "bboy",
+    "genealogy",
+    "blackbook",
+    "graph",
+    "map"
+  ],
+  "author": "The Blackbook Map",
+  "license": "ISC"
+}
