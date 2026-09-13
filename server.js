@@ -21,6 +21,19 @@ const {
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const PUBLIC_DIR = __dirname;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'blackbook2026';
+
+function verifyAdminToken(req) {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  if (!token) return false;
+  try {
+    const decoded = Buffer.from(token, 'base64').toString('utf8');
+    return decoded.startsWith(ADMIN_PASSWORD + ':');
+  } catch (_) {
+    return false;
+  }
+}
 
 /**
  * MIME type resolver for static files
@@ -193,11 +206,44 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // Get All Crews
+  // Admin Authentication
+  if (pathname === '/api/admin/login' && method === 'POST') {
+    try {
+      const body = await parseJsonBody(req);
+      const pass = (body && body.password) ? String(body.password).trim() : '';
+      if (pass === ADMIN_PASSWORD) {
+        const token = Buffer.from(`${ADMIN_PASSWORD}:${Date.now()}`).toString('base64');
+        return sendJson(200, { success: true, token });
+      }
+      return sendError(401, 'Invalid admin password');
+    } catch (err) {
+      return sendError(400, err.message);
+    }
+  }
+
+  if (pathname === '/api/admin/verify' && (method === 'GET' || method === 'POST')) {
+    const isValid = verifyAdminToken(req);
+    return sendJson(isValid ? 200 : 401, { authenticated: isValid });
+  }
+
+  // Get All Crews (with optional active/inactive and era filters)
   if (pathname === '/api/crews' && method === 'GET') {
     try {
       const includeArchived = parsedUrl.searchParams.get('includeArchived') === 'true';
-      const crews = await getAllCrews(includeArchived);
+      let crews = await getAllCrews(includeArchived);
+
+      const statusFilter = parsedUrl.searchParams.get('status');
+      if (statusFilter === 'active') {
+        crews = crews.filter(c => c.isActive);
+      } else if (statusFilter === 'inactive') {
+        crews = crews.filter(c => !c.isActive);
+      }
+
+      const eraFilter = parsedUrl.searchParams.get('era');
+      if (eraFilter) {
+        crews = crews.filter(c => Array.isArray(c.erasActive) && c.erasActive.includes(eraFilter));
+      }
+
       return sendJson(200, crews);
     } catch (err) {
       return sendError(500, err.message);

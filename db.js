@@ -36,7 +36,7 @@ function getDbInfo() {
   };
 }
 
-// Default starter roster (user-curated crews with Bboy Gravity included)
+// Default starter roster (user-curated crews with Bboy Gravity and era tags included)
 const DEFAULT_CREWS = [
   {
     id: 'massive_monkees',
@@ -45,7 +45,9 @@ const DEFAULT_CREWS = [
     lat: 47.6062,
     lng: -122.3321,
     year: 1999,
-    founders: ['J-Sun', 'Smilez', 'Jerome', 'Tim', 'Brysen', 'Thesis', 'Bboy Gravity'],
+    isActive: true,
+    erasActive: ["90's", "00's", "10's", "20's"],
+    founders: [],
     parentIds: [
       'crew_1789255058187',
       'crew_1789255084884',
@@ -68,6 +70,8 @@ const DEFAULT_CREWS = [
     lat: 47.6038321,
     lng: -122.330062,
     year: null,
+    isActive: true,
+    erasActive: ["90's"],
     founders: [],
     parentIds: [],
     childIds: ['massive_monkees'],
@@ -83,6 +87,8 @@ const DEFAULT_CREWS = [
     lat: 47.6038321,
     lng: -122.330062,
     year: 1999,
+    isActive: true,
+    erasActive: ["90's", "00's"],
     founders: [],
     parentIds: [],
     childIds: ['massive_monkees'],
@@ -98,6 +104,8 @@ const DEFAULT_CREWS = [
     lat: 47.9793437,
     lng: -122.2127011,
     year: null,
+    isActive: true,
+    erasActive: ["90's", "00's"],
     founders: [],
     parentIds: [],
     childIds: ['crew_1789255550302', 'massive_monkees'],
@@ -113,6 +121,8 @@ const DEFAULT_CREWS = [
     lat: 47.6144219,
     lng: -122.192337,
     year: null,
+    isActive: true,
+    erasActive: ["90's", "00's"],
     founders: [],
     parentIds: [],
     childIds: ['crew_1789255672502', 'massive_monkees'],
@@ -128,6 +138,8 @@ const DEFAULT_CREWS = [
     lat: 47.7564667,
     lng: -122.3437497,
     year: null,
+    isActive: true,
+    erasActive: ["90's", "00's"],
     founders: [],
     parentIds: ['crew_1789255464998'],
     childIds: [],
@@ -143,6 +155,8 @@ const DEFAULT_CREWS = [
     lat: 47.6144219,
     lng: -122.192337,
     year: null,
+    isActive: true,
+    erasActive: ["90's", "00's"],
     founders: [],
     parentIds: ['crew_1789255481268'],
     childIds: [],
@@ -158,6 +172,8 @@ const DEFAULT_CREWS = [
     lat: 47.6062,
     lng: -122.3321,
     year: null,
+    isActive: true,
+    erasActive: ["90's", "00's"],
     founders: [],
     parentIds: [],
     childIds: ['massive_monkees'],
@@ -173,6 +189,8 @@ const DEFAULT_CREWS = [
     lat: 47.6062,
     lng: -122.3321,
     year: null,
+    isActive: true,
+    erasActive: ["90's", "00's"],
     founders: [],
     parentIds: [],
     childIds: ['massive_monkees'],
@@ -205,6 +223,8 @@ async function initDb() {
       email TEXT,
       open_for_sessions INTEGER DEFAULT 1,
       notes TEXT,
+      is_active INTEGER DEFAULT 1,
+      eras_active TEXT DEFAULT '[]',
       is_archived INTEGER DEFAULT 0,
       archive_reason TEXT,
       is_locked INTEGER DEFAULT 0,
@@ -262,12 +282,19 @@ async function initDb() {
   await client.execute(`CREATE INDEX IF NOT EXISTS idx_rev_crew ON crew_revisions(crew_id, created_at DESC);`);
   await client.execute(`CREATE INDEX IF NOT EXISTS idx_rev_created ON crew_revisions(created_at DESC);`);
 
-  // Safe migrations for legacy databases
+  // Safe migrations for legacy databases (local & Turso)
+  try { await client.execute('ALTER TABLE crews ADD COLUMN is_active INTEGER DEFAULT 1;'); } catch (_) {}
+  try { await client.execute('ALTER TABLE crews ADD COLUMN eras_active TEXT DEFAULT "[]";'); } catch (_) {}
   try { await client.execute('ALTER TABLE crews ADD COLUMN is_archived INTEGER DEFAULT 0;'); } catch (_) {}
   try { await client.execute('ALTER TABLE crews ADD COLUMN archive_reason TEXT;'); } catch (_) {}
   try { await client.execute('ALTER TABLE crews ADD COLUMN is_locked INTEGER DEFAULT 0;'); } catch (_) {}
   try { await client.execute('ALTER TABLE crews ADD COLUMN phone TEXT;'); } catch (_) {}
   try { await client.execute('ALTER TABLE crews ADD COLUMN website TEXT;'); } catch (_) {}
+
+  // Explicit user requirement: Massive Monkees founders must remain empty [] ("those are not founders, leave them out")
+  try {
+    await client.execute({ sql: "DELETE FROM founders WHERE crew_id = 'massive_monkees';", args: [] });
+  } catch (_) {}
 
   // Seed default crews if database is brand new
   await seedDefaults(DEFAULT_CREWS);
@@ -305,6 +332,17 @@ async function saveRevision(crewId, action, authorName, editSummary, snapshotObj
           VALUES (?, ?, ?, ?, ?);`,
     args: [crewId, action, author, summary, snapshotStr],
   });
+}
+
+function parseEras(erasVal) {
+  if (Array.isArray(erasVal)) return erasVal;
+  if (!erasVal) return [];
+  try {
+    const parsed = JSON.parse(erasVal);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return String(erasVal).split(',').map(s => s.trim()).filter(Boolean);
+  }
 }
 
 /**
@@ -353,6 +391,8 @@ async function getAllCrews(includeArchived = false) {
     lat: c.lat,
     lng: c.lng,
     year: c.year,
+    isActive: c.is_active != null ? Boolean(c.is_active) : true,
+    erasActive: parseEras(c.eras_active),
     founders: foundersMap[c.id] || [],
     parentIds: parentMap[c.id] || [],
     childIds: childMap[c.id] || [],
@@ -407,6 +447,8 @@ async function getCrewById(id, includeArchived = true) {
     lat: crew.lat,
     lng: crew.lng,
     year: crew.year,
+    isActive: crew.is_active != null ? Boolean(crew.is_active) : true,
+    erasActive: parseEras(crew.eras_active),
     founders,
     parentIds: parents,
     childIds: children,
@@ -444,6 +486,8 @@ async function getCrewHistory(crewId) {
         name: snap.name,
         city: snap.city,
         year: snap.year,
+        isActive: snap.isActive != null ? snap.isActive : true,
+        erasCount: Array.isArray(snap.erasActive) ? snap.erasActive.length : 0,
         foundersCount: Array.isArray(snap.founders) ? snap.founders.length : 0,
         heritageCount: Array.isArray(snap.parentIds) ? snap.parentIds.length : 0,
         offspringCount: Array.isArray(snap.childIds) ? snap.childIds.length : 0,
@@ -474,6 +518,8 @@ async function upsertCrew(crewData, authorName = 'Anonymous', editSummary = '', 
     lat,
     lng,
     year,
+    isActive = true,
+    erasActive = [],
     founders = [],
     parentIds = [],
     childIds = [],
@@ -486,6 +532,8 @@ async function upsertCrew(crewData, authorName = 'Anonymous', editSummary = '', 
   } = crewData;
 
   const targetId = id || ('crew_' + Date.now());
+  const isActiveNum = (isActive === false || isActive === 0 || isActive === '0') ? 0 : 1;
+  const erasStr = JSON.stringify(Array.isArray(erasActive) ? erasActive : parseEras(erasActive));
 
   const tx = await client.transaction('write');
   try {
@@ -498,7 +546,7 @@ async function upsertCrew(crewData, authorName = 'Anonymous', editSummary = '', 
     if (existing) {
       await tx.execute({
         sql: `UPDATE crews
-              SET name = ?, city = ?, lat = ?, lng = ?, year = ?, instagram = ?, email = ?, phone = ?, website = ?, open_for_sessions = 1, notes = ?, is_archived = 0, archive_reason = NULL, updated_at = datetime('now')
+              SET name = ?, city = ?, lat = ?, lng = ?, year = ?, instagram = ?, email = ?, phone = ?, website = ?, open_for_sessions = 1, notes = ?, is_active = ?, eras_active = ?, is_archived = 0, archive_reason = NULL, updated_at = datetime('now')
               WHERE id = ?;`,
         args: [
           name,
@@ -511,13 +559,15 @@ async function upsertCrew(crewData, authorName = 'Anonymous', editSummary = '', 
           phone || '',
           website || '',
           notes || '',
+          isActiveNum,
+          erasStr,
           targetId,
         ],
       });
     } else {
       await tx.execute({
-        sql: `INSERT INTO crews (id, name, city, lat, lng, year, instagram, email, phone, website, open_for_sessions, notes, is_locked)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?);`,
+        sql: `INSERT INTO crews (id, name, city, lat, lng, year, instagram, email, phone, website, open_for_sessions, notes, is_active, eras_active, is_locked)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?);`,
         args: [
           targetId,
           name,
@@ -530,6 +580,8 @@ async function upsertCrew(crewData, authorName = 'Anonymous', editSummary = '', 
           phone || '',
           website || '',
           notes || '',
+          isActiveNum,
+          erasStr,
           isLocked ? 1 : 0,
         ],
       });
@@ -772,6 +824,7 @@ async function getStats() {
   await ensureReady();
   const totalCrewsRes = await client.execute(`SELECT COUNT(*) AS count FROM crews WHERE is_archived = 0;`);
   const totalArchivedRes = await client.execute(`SELECT COUNT(*) AS count FROM crews WHERE is_archived = 1;`);
+  const totalActiveRes = await client.execute(`SELECT COUNT(*) AS count FROM crews WHERE is_archived = 0 AND (is_active = 1 OR is_active IS NULL);`);
   const totalRelsRes = await client.execute(`SELECT COUNT(*) AS count FROM crew_relationships;`);
   const totalCitiesRes = await client.execute(`SELECT COUNT(DISTINCT city) AS count FROM crews WHERE is_archived = 0;`);
   const totalRevisionsRes = await client.execute(`SELECT COUNT(*) AS count FROM crew_revisions;`);
@@ -790,6 +843,7 @@ async function getStats() {
   return {
     totalCrews: totalCrewsRes.rows[0].count,
     totalArchived: totalArchivedRes.rows[0].count,
+    totalActive: totalActiveRes.rows[0].count,
     totalRelationships: totalRelsRes.rows[0].count,
     totalCities: totalCitiesRes.rows[0].count,
     totalRevisions: totalRevisionsRes.rows[0].count,
@@ -814,9 +868,12 @@ async function seedDefaults(sampleCrews) {
   const tx = await client.transaction('write');
   try {
     for (const c of sampleCrews) {
+      const isActiveNum = (c.isActive === false || c.isActive === 0) ? 0 : 1;
+      const erasStr = JSON.stringify(Array.isArray(c.erasActive) ? c.erasActive : []);
+
       await tx.execute({
-        sql: `INSERT INTO crews (id, name, city, lat, lng, year, instagram, email, open_for_sessions, is_locked)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        sql: `INSERT INTO crews (id, name, city, lat, lng, year, instagram, email, open_for_sessions, is_active, eras_active, is_locked)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         args: [
           c.id,
           c.name,
@@ -827,6 +884,8 @@ async function seedDefaults(sampleCrews) {
           c.instagram || '',
           c.email || '',
           c.openForSessions ? 1 : 0,
+          isActiveNum,
+          erasStr,
           c.isLocked ? 1 : 0,
         ],
       });

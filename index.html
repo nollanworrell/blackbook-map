@@ -472,29 +472,26 @@
   <div id="map"></div>
 
   <!-- ════════════ HEADER ════════════ -->
-  <header id="header" class="gap-2 sm:gap-4">
-    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-      <div class="stencil-logo hidden sm:block">Crew Genealogy</div>
-      <div class="stencil-logo sm:hidden text-sm">Blackbook</div>
-      <!-- Crew Counter Badge -->
-      <div id="crew-count-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-caution/40 bg-concrete/80 font-mono text-xs text-caution box-glow-caution shrink-0" title="Total Crews Represented in Blackbook">
-        <span class="text-sm">🔥</span>
+  <header id="header" class="px-2.5 sm:px-4 py-2 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-3 bg-asphalt/95 backdrop-blur-md border-b border-cyan/20 z-[1100]">
+    <!-- Brand / Logo & Counter -->
+    <div class="flex items-center gap-2 shrink-0">
+      <div class="stencil-logo text-sm sm:text-base tracking-wider">Blackbook</div>
+      <div id="crew-count-badge" class="flex items-center gap-1 px-2 py-0.5 rounded-md border border-caution/40 bg-concrete/80 font-mono text-[11px] text-caution box-glow-caution shrink-0" title="Total Active Crews on Map">
+        <span>🔥</span>
         <span id="crew-count-number" class="font-bold text-white">0</span>
-        <span class="hidden md:inline text-smoke">Crews</span>
       </div>
     </div>
 
-    <!-- Quick Search & Location Radius Bar -->
-    <div class="relative flex-1 max-w-xs md:max-w-md" id="search-container">
+    <!-- Center: Search Input & Radius Bar (Primary) -->
+    <div class="relative flex-1 min-w-[170px] max-w-full sm:max-w-md order-3 sm:order-2" id="search-container">
       <div class="relative flex items-center">
         <span class="absolute left-2.5 text-smoke pointer-events-none text-xs">🔍</span>
-        <input type="text" id="global-search-input" class="w-full bg-concrete/95 border border-gutter hover:border-cyan/50 focus:border-cyan rounded-lg pl-7 pr-7 py-1.5 text-xs font-mono text-white placeholder-smoke/60 outline-none transition-all" placeholder="Search crew or city…" autocomplete="off" />
+        <input type="text" id="global-search-input" class="w-full bg-concrete border border-gutter hover:border-cyan/50 focus:border-cyan rounded-lg pl-7 pr-7 py-1.5 text-xs font-mono text-white placeholder-smoke/60 outline-none transition-all" placeholder="Search crew, city, founder…" autocomplete="off" />
         <button id="btn-clear-search" class="absolute right-2 text-smoke hover:text-white hidden p-0.5 text-xs" title="Clear search">&times;</button>
       </div>
 
       <!-- Search & Radius Filter Dropdown -->
       <div id="search-dropdown-panel" class="hidden absolute top-full left-0 right-0 mt-1.5 p-3 bg-concrete/95 border border-cyan/40 rounded-xl shadow-2xl backdrop-blur-md z-[2000] font-mono text-xs space-y-2.5">
-        <!-- Radius Settings Row -->
         <div class="flex items-center justify-between gap-2 border-b border-gutter pb-2">
           <div class="flex items-center gap-1.5 text-[11px] text-smoke">
             <span>📍 Radius:</span>
@@ -511,38 +508,67 @@
           </div>
           <button id="btn-run-location-search" class="text-cyan hover:underline text-[11px] font-bold">Search Location &rarr;</button>
         </div>
-
-        <!-- Search Results List -->
         <div id="search-results-list" class="max-h-56 overflow-y-auto space-y-1 divide-y divide-gutter/40 pr-1">
           <p class="text-smoke/60 italic py-2 text-center text-[11px]">Type a crew name or location</p>
         </div>
       </div>
     </div>
 
-    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-      <div id="backend-status-badge" class="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gutter bg-concrete/60 font-mono text-[11px] transition-all min-h-[40px]" title="Backend Database Connection Status">
-        <span class="w-2 h-2 rounded-full bg-smoke/40 inline-block animate-pulse" id="backend-status-dot"></span>
-        <span class="text-smoke/70" id="backend-status-text">Connecting…</span>
+    <!-- Active Status Filter Pills -->
+    <div class="flex items-center bg-concrete/90 p-0.5 rounded-lg border border-gutter text-[11px] font-mono shrink-0 order-4 sm:order-3">
+      <button id="filter-btn-all" class="px-2 py-1 rounded font-bold bg-cyan/20 text-cyan transition-all" title="Show all crews">All</button>
+      <button id="filter-btn-active" class="px-2 py-1 rounded text-smoke hover:text-white transition-all flex items-center gap-1" title="Show active crews only">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Active
+      </button>
+      <button id="filter-btn-inactive" class="px-2 py-1 rounded text-smoke hover:text-white transition-all" title="Show inactive/historic crews">Inactive</button>
+    </div>
+
+    <!-- Controls & Actions (Right) -->
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 order-2 sm:order-4">
+      <!-- Admin Protected Tools (Hidden by default unless logged in) -->
+      <div id="backend-status-badge" class="hidden items-center gap-1.5 px-2 py-1 rounded-lg border border-cyan/30 bg-concrete/60 font-mono text-[11px] transition-all" title="Backend Database Status">
+        <span class="w-2 h-2 rounded-full bg-cyan inline-block box-glow-cyan" id="backend-status-dot"></span>
+        <span class="text-cyan font-bold text-[10px]" id="backend-status-text">☁️ Turso</span>
       </div>
-      <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-concrete border border-caution/30 text-caution font-mono text-xs hover:border-caution hover:bg-caution/10 transition-all min-h-[40px]" id="btn-open-backup" aria-label="Backup & Restore Blackbook Data">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        <span class="hidden sm:inline">Backup</span>
+
+      <button class="hidden items-center gap-1 px-2.5 py-1.5 rounded-lg bg-concrete border border-caution/30 text-caution font-mono text-xs hover:border-caution hover:bg-caution/10 transition-all min-h-[36px]" id="btn-open-backup" aria-label="Backup & Restore Blackbook Data">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span class="hidden md:inline">Backup</span>
       </button>
-      <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-concrete border border-magenta/30 text-magenta font-mono text-xs hover:border-magenta hover:bg-magenta/10 transition-all min-h-[40px]" id="btn-open-activity" aria-label="Open Blackbook Changelog">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span class="hidden sm:inline">Changelog</span>
-        <span class="sm:hidden">Log</span>
+
+      <!-- Primary Action: + Add Crew (High prominence on mobile & desktop) -->
+      <button class="btn-add pulse-glow !py-1.5 !px-3 sm:!px-4 !min-h-[36px] text-xs font-bold flex items-center gap-1.5" id="btn-open-modal" aria-label="Add crew and lineage">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        <span>Add Crew</span>
       </button>
-      <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-concrete border border-cyan/30 text-cyan font-mono text-xs hover:border-cyan hover:bg-cyan/10 transition-all min-h-[40px]" id="btn-toggle-network" aria-label="Toggle network lines">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><line x1="8.5" y1="7" x2="15.5" y2="7"/><line x1="7.5" y1="8.5" x2="10.5" y2="15.5"/><line x1="16.5" y1="8.5" x2="13.5" y2="15.5"/></svg>
-        <span class="hidden md:inline">Graph:</span>
-        <span id="network-toggle-label" class="font-bold text-white">ON</span>
-      </button>
-      <button class="btn-add pulse-glow !py-2 !px-3 sm:!px-4 !min-h-[40px] text-xs" id="btn-open-modal" aria-label="Add crew and lineage">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
-        <span class="hidden md:inline">Add Crew</span>
-        <span class="md:hidden">Add</span>
-      </button>
+
+      <!-- Overflow Menu (About, Changelog, Graph Toggle, Admin Login) -->
+      <div class="relative">
+        <button id="btn-open-menu-dropdown" class="flex items-center justify-center p-2 rounded-lg bg-concrete border border-gutter hover:border-cyan/40 text-smoke hover:text-white transition-all min-h-[36px] min-w-[36px]" aria-label="Open Navigation Menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="menu-dropdown-panel" class="hidden absolute right-0 top-full mt-2 w-52 p-1.5 bg-[#141414] border border-cyan/30 rounded-xl shadow-2xl backdrop-blur-md z-[2200] font-mono text-xs space-y-1">
+          <button id="menu-btn-about" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-smoke hover:text-cyan hover:bg-cyan/10 transition-all">
+            <span>📖</span>
+            <span class="font-bold">About &amp; Guide</span>
+          </button>
+          <button id="menu-btn-activity" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-smoke hover:text-magenta hover:bg-magenta/10 transition-all">
+            <span>📜</span>
+            <span>Changelog Feed</span>
+          </button>
+          <button id="menu-btn-toggle-network" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-smoke hover:text-white hover:bg-gutter/50 transition-all">
+            <span class="flex items-center gap-2.5"><span>🕸️</span><span>Lineage Graph</span></span>
+            <span id="network-toggle-label" class="text-[10px] font-bold text-cyan bg-cyan/10 px-1.5 py-0.5 rounded">ON</span>
+          </button>
+          <div class="border-t border-gutter/50 my-1"></div>
+          <button id="menu-btn-admin" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-smoke hover:text-caution hover:bg-caution/10 transition-all">
+            <span id="menu-admin-icon">🔒</span>
+            <span id="menu-admin-text">Admin Login</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -563,9 +589,10 @@
         </button>
       </div>
 
-      <!-- Founding info -->
-      <div class="flex gap-3 flex-wrap items-center">
+      <!-- Founding info & Active Status -->
+      <div class="flex gap-2 flex-wrap items-center">
         <span class="bg-gutter px-3 py-1 rounded-full text-xs font-mono text-smoke" id="panel-year">Est. —</span>
+        <span id="panel-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5"></span>
         <div class="ml-auto flex items-center gap-2">
           <button class="flex items-center gap-1.5 text-xs font-mono text-caution hover:text-white bg-caution/10 hover:bg-caution/20 border border-caution/30 px-3 py-1.5 rounded-lg transition-colors min-h-[40px]" id="btn-edit-crew" aria-label="Edit crew details">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 1.5l2 2L4 12H2v-2z"/><line x1="8.5" y1="3.5" x2="10.5" y2="5.5"/></svg>
@@ -576,6 +603,12 @@
             Delete
           </button>
         </div>
+      </div>
+
+      <!-- Active Eras Tags in Detail Panel -->
+      <div id="panel-eras-container" class="hidden flex-wrap items-center gap-1.5 pt-0.5">
+        <span class="text-[11px] font-mono text-smoke/70 uppercase tracking-wider">Active Eras:</span>
+        <div id="panel-eras-list" class="flex flex-wrap gap-1"></div>
       </div>
 
       <!-- Navigation Tabs: Info vs History -->
@@ -666,6 +699,36 @@
         <div>
           <label class="block text-xs font-mono text-smoke mb-1.5 uppercase tracking-wider">Founding Year</label>
           <input type="number" class="bb-input" id="input-year" placeholder="e.g. 1977" min="1970" max="2030" />
+        </div>
+        <!-- Activity Status Toggle -->
+        <div>
+          <label class="block text-xs font-mono text-smoke mb-1.5 uppercase tracking-wider">Current Activity Status</label>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-status-active" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-emerald-500/60 bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold transition-all">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+              Active Crew
+            </button>
+            <button type="button" id="btn-status-inactive" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-gutter bg-concrete/60 text-smoke font-mono text-xs hover:border-smoke/40 transition-all">
+              <span class="w-2 h-2 rounded-full bg-smoke/60 inline-block"></span>
+              Inactive / Historic
+            </button>
+          </div>
+          <input type="hidden" id="input-is-active" value="true" />
+        </div>
+        <!-- Eras / Decades Active -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-mono text-smoke uppercase tracking-wider">Eras Active (Decades)</label>
+            <span class="text-[10px] font-mono text-smoke/70">Click to toggle</span>
+          </div>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5" id="era-pills-container">
+            <button type="button" class="era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold" data-era="70's">70's</button>
+            <button type="button" class="era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold" data-era="80's">80's</button>
+            <button type="button" class="era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold" data-era="90's">90's</button>
+            <button type="button" class="era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold" data-era="00's">00's</button>
+            <button type="button" class="era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold" data-era="10's">10's</button>
+            <button type="button" class="era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold" data-era="20's">20's</button>
+          </div>
         </div>
       </div>
 
@@ -909,6 +972,187 @@
     </div>
   </div>
 
+  <!-- ════════════ ABOUT & HOW TO USE MODAL ════════════ -->
+  <div id="about-modal-overlay" class="fixed inset-0 z-[2800] bg-black/85 backdrop-blur-md hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="About Blackbook Map and User Guide">
+    <div class="bg-[#111] border border-cyan/40 rounded-2xl w-full max-w-2xl max-h-[88vh] flex flex-col shadow-2xl box-glow-cyan overflow-hidden">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-5 border-b border-gutter/80 bg-concrete/60 shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">📖</span>
+          <div>
+            <h2 class="font-marker text-xl text-cyan glow-cyan tracking-wider">Blackbook: Global BBoy Genealogy</h2>
+            <p class="font-mono text-xs text-smoke">Mapping the living roots, crews, and lineage of breaking culture</p>
+          </div>
+        </div>
+        <button id="btn-close-about-modal" class="text-smoke hover:text-caution p-1.5 rounded-lg border border-transparent hover:border-gutter min-w-[36px] min-h-[36px] flex items-center justify-center transition-all" aria-label="Close about guide">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="16" y2="16"/><line x1="16" y1="4" x2="4" y2="16"/></svg>
+        </button>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="p-6 overflow-y-auto space-y-6 font-mono text-xs text-smoke/90 leading-relaxed">
+        <!-- What is Blackbook -->
+        <div class="space-y-2">
+          <h3 class="font-marker text-base text-magenta glow-magenta tracking-wide uppercase flex items-center gap-2">
+            <span>⚡</span> What is Blackbook Map?
+          </h3>
+          <p class="text-smoke">
+            In graffiti and breaking culture, a <strong class="text-cyan">Blackbook</strong> is a sacred archive—a sketchbook of styles, signatures, and history passed down between generations.
+          </p>
+          <p class="text-smoke">
+            <strong class="text-white">Blackbook Map</strong> is an open, community-driven living genealogy of breaking crews across the globe. It visually documents the lineage ties that link legendary pioneers to modern cyphers: who mentored whom, what crews merged, and which generation sparked the next.
+          </p>
+        </div>
+
+        <!-- How to Use -->
+        <div class="space-y-3">
+          <h3 class="font-marker text-base text-cyan glow-cyan tracking-wide uppercase flex items-center gap-2">
+            <span>🗺️</span> How to Use
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl bg-concrete/80 border border-gutter/80 space-y-1">
+              <div class="text-white font-bold flex items-center gap-2">
+                <span>🔍</span> Search &amp; Filter
+              </div>
+              <p class="text-[11px] text-smoke/80">
+                Use the top search bar to find crews by name or city. Filter by <span class="text-emerald-400 font-bold">Active</span> vs <span class="text-smoke font-bold">Inactive / Historic</span> crews.
+              </p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-concrete/80 border border-gutter/80 space-y-1">
+              <div class="text-white font-bold flex items-center gap-2">
+                <span>📍</span> Inspect Crews
+              </div>
+              <p class="text-[11px] text-smoke/80">
+                Tap any crew pin on the map to open their dossier: home city, founding year, key founders, active eras, and social links.
+              </p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-concrete/80 border border-gutter/80 space-y-1">
+              <div class="text-white font-bold flex items-center gap-2">
+                <span>🕸️</span> Follow Lineage Arcs
+              </div>
+              <p class="text-[11px] text-smoke/80">
+                Selecting a crew highlights glowing arcs: <span class="text-magenta font-bold">Pink</span> points to Heritage (parent crews) and <span class="text-cyan font-bold">Cyan</span> points to Offspring (child crews).
+              </p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-concrete/80 border border-gutter/80 space-y-1">
+              <div class="text-white font-bold flex items-center gap-2">
+                <span>➕</span> Add &amp; Preserve History
+              </div>
+              <p class="text-[11px] text-smoke/80">
+                Click <span class="text-cyan font-bold">+ Add Crew</span> to add your crew or link missing branches. Anyone can contribute to keep the record accurate.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Community Protection -->
+        <div class="p-3.5 rounded-xl bg-caution/10 border border-caution/30 space-y-1.5">
+          <div class="text-caution font-bold flex items-center gap-2 text-xs">
+            <span>🛡️</span> Wikipedia-Style Community Protection
+          </div>
+          <p class="text-[11px] text-smoke">
+            Every creation, update, and lineage connection is recorded in the permanent Blackbook Changelog. If mistakes or vandalism occur, any member can restore or revert changes in 1 click.
+          </p>
+        </div>
+
+        <!-- Version Updates & Release Notes -->
+        <div class="space-y-3 border-t border-gutter/80 pt-4">
+          <h3 class="font-marker text-base text-white tracking-wide uppercase flex items-center gap-2">
+            <span>🚀</span> Version History &amp; Release Notes
+          </h3>
+
+          <div class="space-y-3 font-mono text-[11px]">
+            <!-- v1.2 -->
+            <div class="p-3 rounded-xl bg-concrete/50 border border-cyan/30 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-cyan text-xs">Version 1.2.0 (Current)</span>
+                <span class="text-smoke/60">September 2026</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-smoke/90">
+                <li><strong class="text-white">Turso Cloud SQLite:</strong> Persistent serverless cloud database for uninterrupted 24/7 reliability.</li>
+                <li><strong class="text-white">Active Status &amp; Filters:</strong> New Active vs. Inactive crew indicators and top-level map filter buttons.</li>
+                <li><strong class="text-white">Decade / Era Tags:</strong> Added era pills (70's, 80's, 90's, 00's, 10's, 20's) to track when crews were active.</li>
+                <li><strong class="text-white">Mobile-First UI Overhaul:</strong> Search and "+ Add Crew" elevated to primary touch targets on all screen sizes.</li>
+                <li><strong class="text-white">Admin Authentication:</strong> Master password lock hides cloud connection status and backup tools from public view.</li>
+              </ul>
+            </div>
+
+            <!-- v1.1 -->
+            <div class="p-3 rounded-xl bg-concrete/40 border border-gutter space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-magenta text-xs">Version 1.1.0</span>
+                <span class="text-smoke/60">September 2026</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-smoke/80">
+                <li><strong class="text-white">Wikipedia-Style Versioning:</strong> Changelog feed, revision histories, and 1-click restore for accidental deletions.</li>
+                <li><strong class="text-white">Data Backups:</strong> Client-side JSON export and import suite to ensure zero data loss.</li>
+                <li><strong class="text-white">Animated Lineage Arcs:</strong> Bidirectional heritage and offspring connection curves.</li>
+              </ul>
+            </div>
+
+            <!-- v1.0 -->
+            <div class="p-3 rounded-xl bg-concrete/30 border border-gutter/60 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-smoke text-xs">Version 1.0.0</span>
+                <span class="text-smoke/60">Initial Release</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-smoke/70">
+                <li>Global dark-theme interactive map with custom neon bboy crew markers.</li>
+                <li>3-step submission wizard with instant city geocoding and relationship linking.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-4 border-t border-gutter bg-concrete/70 flex items-center justify-between shrink-0">
+        <span class="text-[11px] font-mono text-smoke/60">Blackbook Project &bull; Built for the Culture</span>
+        <button id="btn-done-about" class="px-5 py-2 rounded-lg bg-cyan text-asphalt font-mono font-bold text-xs box-glow-cyan hover:brightness-110 transition-all min-h-[40px]">
+          Got It! Let's Cypher
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ ADMIN LOGIN MODAL ════════════ -->
+  <div id="admin-modal-overlay" class="fixed inset-0 z-[2800] bg-black/85 backdrop-blur-md hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Admin Authentication">
+    <div class="bg-[#111] border border-caution/40 rounded-2xl w-full max-w-sm p-6 shadow-2xl box-glow-caution space-y-4">
+      <div class="flex items-center justify-between border-b border-gutter pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🔒</span>
+          <div>
+            <h3 class="font-marker text-lg text-caution glow-caution">Admin Access</h3>
+            <p class="font-mono text-[11px] text-smoke">Unlock database sync &amp; backup tools</p>
+          </div>
+        </div>
+        <button id="btn-close-admin-modal" class="text-smoke hover:text-caution p-1 min-w-[36px] min-h-[36px] flex items-center justify-center" aria-label="Close admin modal">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="14" y2="14"/><line x1="14" y1="4" x2="4" y2="14"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 font-mono">
+        <p class="text-xs text-smoke leading-relaxed">
+          Enter the master password to view database cloud status, export/import JSON backups, and manage backend sync.
+        </p>
+        <div>
+          <label class="block text-[11px] text-smoke uppercase tracking-wider mb-1.5">Master Password</label>
+          <input type="password" id="admin-password-input" class="bb-input" placeholder="••••••••••••" autocomplete="current-password" />
+        </div>
+        <div id="admin-login-error" class="hidden text-xs text-magenta font-mono p-2 rounded bg-magenta/10 border border-magenta/30"></div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="btn-cancel-admin-modal" class="font-mono text-xs text-smoke hover:text-white px-4 py-2.5 rounded-lg border border-gutter hover:border-smoke min-h-[44px] transition-colors">
+          Cancel
+        </button>
+        <button id="btn-submit-admin-login" class="font-mono text-xs text-asphalt bg-caution hover:bg-caution/90 font-bold px-5 py-2.5 rounded-lg box-glow-caution min-h-[44px] transition-all">
+          Unlock Admin
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ════════════ TOAST NOTIFICATION ════════════ -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[3000] bg-concrete border border-cyan/30 text-cyan font-mono text-sm px-5 py-3 rounded-lg box-glow-cyan opacity-0 pointer-events-none transition-opacity duration-300">
     Crew added to the map!
@@ -936,7 +1180,7 @@
         lat: 47.6062,
         lng: -122.3321,
         year: 1999,
-        founders: ['J-Sun', 'Smilez', 'Jerome', 'Tim', 'Brysen', 'Thesis', 'Bboy Gravity'],
+        founders: [],
         parentIds: [
           'crew_1789255058187',
           'crew_1789255084884',
@@ -1083,6 +1327,65 @@
     let isBackendOnline = false;
 
     let backendDbInfo = null;
+    let isAdminLoggedIn = !!localStorage.getItem('blackbook_admin_token');
+
+    function updateAdminUI() {
+      const badge = document.getElementById('backend-status-badge');
+      const btnBackup = document.getElementById('btn-open-backup');
+      const menuAdminIcon = document.getElementById('menu-admin-icon');
+      const menuAdminText = document.getElementById('menu-admin-text');
+
+      if (isAdminLoggedIn) {
+        if (badge) {
+          badge.classList.remove('hidden');
+          badge.classList.add('flex');
+        }
+        if (btnBackup) {
+          btnBackup.classList.remove('hidden');
+          btnBackup.classList.add('flex');
+        }
+        if (menuAdminIcon) menuAdminIcon.textContent = '🔓';
+        if (menuAdminText) menuAdminText.textContent = 'Admin Logout';
+      } else {
+        if (badge) {
+          badge.classList.add('hidden');
+          badge.classList.remove('flex', 'sm:flex');
+        }
+        if (btnBackup) {
+          btnBackup.classList.add('hidden');
+          btnBackup.classList.remove('flex');
+        }
+        if (menuAdminIcon) menuAdminIcon.textContent = '🔒';
+        if (menuAdminText) menuAdminText.textContent = 'Admin Login';
+      }
+    }
+
+    async function verifyAdminSession() {
+      const token = localStorage.getItem('blackbook_admin_token');
+      if (!token) {
+        isAdminLoggedIn = false;
+        updateAdminUI();
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          isAdminLoggedIn = true;
+        } else {
+          localStorage.removeItem('blackbook_admin_token');
+          isAdminLoggedIn = false;
+        }
+      } catch {
+        isAdminLoggedIn = true; // Retain token in offline mode
+      }
+      updateAdminUI();
+    }
 
     function updateBackendBadge(online, healthInfo = null) {
       if (healthInfo) backendDbInfo = healthInfo;
@@ -1102,12 +1405,12 @@
           text.className = 'text-cyan font-bold';
           badge.title = 'Connected to Local SQLite Database';
         }
-        badge.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-cyan/30 bg-concrete/60 font-mono text-[11px] transition-all min-h-[40px]';
+        badge.className = (isAdminLoggedIn ? 'flex' : 'hidden') + ' items-center gap-1.5 px-2 py-1 rounded-lg border border-cyan/30 bg-concrete/60 font-mono text-[11px] transition-all min-h-[36px]';
       } else {
         dot.className = 'w-2 h-2 rounded-full bg-caution inline-block box-glow-caution';
         text.textContent = 'Offline (Local)';
         text.className = 'text-smoke/70';
-        badge.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gutter bg-concrete/60 font-mono text-[11px] transition-all min-h-[40px]';
+        badge.className = (isAdminLoggedIn ? 'flex' : 'hidden') + ' items-center gap-1.5 px-2 py-1 rounded-lg border border-gutter bg-concrete/60 font-mono text-[11px] transition-all min-h-[36px]';
         badge.title = 'Backend unreachable, operating from browser storage';
       }
     }
@@ -1227,6 +1530,7 @@
     let markerMap = {};  // id -> marker
     let editingCrewId = null;  // null = adding new, string = editing existing
     let isNetworkVisible = true;  // Global lineage network lines toggle
+    let currentFilterStatus = 'all';  // 'all', 'active', 'inactive'
     let selectedParentIds = [];
     let selectedChildIds = [];
     let pendingQuickCrewRole = 'parent'; // 'parent' or 'child'
@@ -1354,10 +1658,10 @@
       const renderedPairs = new Set();
 
       crews.forEach(crew => {
-        if (crew.isArchived) return;
+        if (!isCrewMatchingFilter(crew)) return;
         const parents = getCrewParents(crew);
         parents.forEach(parent => {
-          if (parent.isArchived) return;
+          if (!isCrewMatchingFilter(parent)) return;
           const pairKey = `${parent.id}->${crew.id}`;
           if (renderedPairs.has(pairKey)) return;
           renderedPairs.add(pairKey);
@@ -1431,14 +1735,55 @@
       document.querySelectorAll('.crew-marker.child-node').forEach(el => el.classList.remove('child-node'));
     }
 
-    // ─── CREW COUNTER HELPER ────────────────────────────────
+    // ─── FILTER & COUNTER HELPERS ───────────────────────────
+    function isCrewMatchingFilter(c) {
+      if (!c || c.isArchived) return false;
+      const isActive = c.isActive !== false && c.isActive !== 0 && c.is_active !== 0;
+      if (currentFilterStatus === 'active') {
+        return isActive;
+      }
+      if (currentFilterStatus === 'inactive') {
+        return !isActive;
+      }
+      return true;
+    }
+
     function updateCrewCount() {
       const countEl = document.getElementById('crew-count-number');
       if (countEl) {
-        const activeCount = crews.filter(c => !c.isArchived).length;
+        const activeCount = crews.filter(c => isCrewMatchingFilter(c)).length;
         countEl.textContent = activeCount;
       }
     }
+
+    // ─── ACTIVE STATUS FILTER CONTROLS ───────────────────────
+    const filterBtnAll = document.getElementById('filter-btn-all');
+    const filterBtnActive = document.getElementById('filter-btn-active');
+    const filterBtnInactive = document.getElementById('filter-btn-inactive');
+
+    function setFilterStatus(status) {
+      currentFilterStatus = status;
+      if (filterBtnAll) {
+        filterBtnAll.className = status === 'all'
+          ? 'px-2 py-1 rounded font-bold bg-cyan/20 text-cyan transition-all'
+          : 'px-2 py-1 rounded text-smoke hover:text-white transition-all';
+      }
+      if (filterBtnActive) {
+        filterBtnActive.className = status === 'active'
+          ? 'px-2 py-1 rounded font-bold bg-emerald-500/20 text-emerald-400 transition-all flex items-center gap-1'
+          : 'px-2 py-1 rounded text-smoke hover:text-white transition-all flex items-center gap-1';
+      }
+      if (filterBtnInactive) {
+        filterBtnInactive.className = status === 'inactive'
+          ? 'px-2 py-1 rounded font-bold bg-smoke/20 text-white transition-all'
+          : 'px-2 py-1 rounded text-smoke hover:text-white transition-all';
+      }
+      renderMarkers();
+    }
+
+    if (filterBtnAll) filterBtnAll.addEventListener('click', () => setFilterStatus('all'));
+    if (filterBtnActive) filterBtnActive.addEventListener('click', () => setFilterStatus('active'));
+    if (filterBtnInactive) filterBtnInactive.addEventListener('click', () => setFilterStatus('inactive'));
 
     // ─── MARKER CREATION ────────────────────────────────────
     function getInitials(name) {
@@ -1467,7 +1812,7 @@
       clusterGroup.clearLayers();
       markerMap = {};
       crews.forEach(c => {
-        if (c.lat != null && c.lng != null && !c.isArchived) {
+        if (c.lat != null && c.lng != null && isCrewMatchingFilter(c)) {
           const m = createCrewMarker(c);
           if (m) clusterGroup.addLayer(m);
         }
@@ -1519,6 +1864,41 @@
       panelName.textContent = crew.name;
       panelLocation.textContent = crew.city;
       panelYear.textContent = crew.year ? `Est. ${crew.year}` : 'Est. Unknown';
+
+      // Active Status Badge
+      const statusBadge = document.getElementById('panel-status-badge');
+      if (statusBadge) {
+        const isActive = crew.isActive !== false && crew.isActive !== 0 && crew.is_active !== 0;
+        if (isActive) {
+          statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+          statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active';
+        } else {
+          statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 bg-smoke/10 text-smoke/70 border border-gutter';
+          statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-smoke/60"></span> Inactive / Historic';
+        }
+      }
+
+      // Eras Active
+      const erasContainer = document.getElementById('panel-eras-container');
+      const erasList = document.getElementById('panel-eras-list');
+      let eras = [];
+      if (Array.isArray(crew.erasActive)) eras = crew.erasActive;
+      else if (crew.eras_active) {
+        try { eras = JSON.parse(crew.eras_active); } catch (_) { eras = String(crew.eras_active).split(',').map(s=>s.trim()).filter(Boolean); }
+      }
+      if (erasContainer && erasList) {
+        if (eras && eras.length > 0) {
+          erasContainer.classList.remove('hidden');
+          erasContainer.classList.add('flex');
+          erasList.innerHTML = eras.map(era =>
+            `<span class="px-2 py-0.5 rounded bg-cyan/10 text-cyan border border-cyan/30 text-[10px] font-mono font-bold">${escapeHtml(era)}</span>`
+          ).join('');
+        } else {
+          erasContainer.classList.add('hidden');
+          erasContainer.classList.remove('flex');
+          erasList.innerHTML = '';
+        }
+      }
 
       // Founders
       if (crew.founders && crew.founders.length) {
@@ -2198,6 +2578,59 @@
         setTimeout(() => childSearchDropdown.classList.remove('show'), 250);
       });
     }
+    // ─── STATUS & ERA HELPERS ────────────────────────────────
+    function setFormStatus(isActive) {
+      const inputActive = document.getElementById('input-is-active');
+      const btnActive = document.getElementById('btn-status-active');
+      const btnInactive = document.getElementById('btn-status-inactive');
+      if (inputActive) inputActive.value = isActive ? 'true' : 'false';
+
+      if (btnActive && btnInactive) {
+        if (isActive) {
+          btnActive.className = 'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-emerald-500/60 bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold transition-all';
+          btnInactive.className = 'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-gutter bg-concrete/60 text-smoke font-mono text-xs hover:border-smoke/40 transition-all';
+        } else {
+          btnActive.className = 'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-gutter bg-concrete/60 text-smoke font-mono text-xs hover:border-smoke/40 transition-all';
+          btnInactive.className = 'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-smoke/60 bg-smoke/20 text-white font-mono text-xs font-bold transition-all';
+        }
+      }
+    }
+
+    const btnStatusActive = document.getElementById('btn-status-active');
+    const btnStatusInactive = document.getElementById('btn-status-inactive');
+    if (btnStatusActive) btnStatusActive.addEventListener('click', () => setFormStatus(true));
+    if (btnStatusInactive) btnStatusInactive.addEventListener('click', () => setFormStatus(false));
+
+    function getSelectedEras() {
+      const pills = document.querySelectorAll('.era-pill.active');
+      return Array.from(pills).map(p => p.dataset.era);
+    }
+
+    function setSelectedEras(eras = []) {
+      const eraSet = new Set(eras);
+      document.querySelectorAll('.era-pill').forEach(pill => {
+        const isSelected = eraSet.has(pill.dataset.era);
+        pill.classList.toggle('active', isSelected);
+        if (isSelected) {
+          pill.className = 'era-pill active py-1.5 px-2 rounded-lg border border-cyan bg-cyan/20 text-cyan font-mono text-xs text-center font-bold shadow-[0_0_8px_rgba(5,217,232,0.4)] transition-all';
+        } else {
+          pill.className = 'era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold';
+        }
+      });
+    }
+
+    document.querySelectorAll('.era-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const isCurrentlyActive = pill.classList.contains('active');
+        pill.classList.toggle('active', !isCurrentlyActive);
+        if (!isCurrentlyActive) {
+          pill.className = 'era-pill active py-1.5 px-2 rounded-lg border border-cyan bg-cyan/20 text-cyan font-mono text-xs text-center font-bold shadow-[0_0_8px_rgba(5,217,232,0.4)] transition-all';
+        } else {
+          pill.className = 'era-pill py-1.5 px-2 rounded-lg border border-gutter bg-concrete/80 text-smoke font-mono text-xs hover:border-cyan/50 transition-all text-center font-bold';
+        }
+      });
+    });
+
     function openModal(editCrew = null) {
       editingCrewId = editCrew ? editCrew.id : null;
       currentStep = 1;
@@ -2212,6 +2645,17 @@
         document.getElementById('input-crew-name').value = editCrew.name || '';
         document.getElementById('input-city').value = editCrew.city || '';
         document.getElementById('input-year').value = editCrew.year || '';
+
+        const isActive = editCrew.isActive !== false && editCrew.isActive !== 0 && editCrew.is_active !== 0;
+        setFormStatus(isActive);
+
+        let eras = [];
+        if (Array.isArray(editCrew.erasActive)) eras = editCrew.erasActive;
+        else if (editCrew.eras_active) {
+          try { eras = JSON.parse(editCrew.eras_active); } catch (_) { eras = String(editCrew.eras_active).split(',').map(s => s.trim()).filter(Boolean); }
+        }
+        setSelectedEras(eras);
+
         document.getElementById('input-founders').value = (editCrew.founders || []).join(', ');
 
         selectedParentIds = getCrewParents(editCrew).map(c => c.id);
@@ -2227,6 +2671,9 @@
         modalTitle.textContent = 'The Blackbook Entry';
         modalTitle.classList.remove('text-caution', 'glow-caution');
         modalTitle.classList.add('text-cyan', 'glow-cyan');
+
+        setFormStatus(true);
+        setSelectedEras([]);
 
         selectedParentIds = [];
         selectedChildIds = [];
@@ -2276,6 +2723,8 @@
       document.getElementById('input-crew-name').value = '';
       document.getElementById('input-city').value = '';
       document.getElementById('input-year').value = '';
+      setFormStatus(true);
+      setSelectedEras([]);
       document.getElementById('input-founders').value = '';
       const pInput = document.getElementById('input-parent-search');
       if (pInput) pInput.value = '';
@@ -2484,6 +2933,10 @@
       const defaultSummary = isEdit ? 'Updated crew details & lineage' : 'Created new crew entry';
       const editSummary = (editSummaryInput && editSummaryInput.value.trim()) || defaultSummary;
 
+      const isActiveInput = document.getElementById('input-is-active');
+      const isActive = isActiveInput ? (isActiveInput.value === 'true') : true;
+      const erasActive = getSelectedEras();
+
       const crewData = {
         id: targetId,
         name: document.getElementById('input-crew-name').value.trim(),
@@ -2491,6 +2944,8 @@
         lat: existingCrew ? existingCrew.lat : null,
         lng: existingCrew ? existingCrew.lng : null,
         year: parseInt(document.getElementById('input-year').value) || null,
+        isActive: isActive,
+        erasActive: erasActive,
         founders: document.getElementById('input-founders').value.split(',').map(s => s.trim()).filter(Boolean),
         parentIds: [...selectedParentIds],
         childIds: [...selectedChildIds],
@@ -2556,6 +3011,8 @@
               if (savedFromDb.lat != null) crewData.lat = savedFromDb.lat;
               if (savedFromDb.lng != null) crewData.lng = savedFromDb.lng;
               if (savedFromDb.isLocked != null) crewData.isLocked = savedFromDb.isLocked;
+              if (savedFromDb.isActive != null) crewData.isActive = savedFromDb.isActive;
+              if (savedFromDb.erasActive != null) crewData.erasActive = savedFromDb.erasActive;
             }
           }
         } catch (err) {
@@ -3307,10 +3764,183 @@
       });
     }
 
+    // ─── NAVIGATION MENU & MODALS WIRING ────────────────────
+    const btnOpenMenuDropdown = document.getElementById('btn-open-menu-dropdown');
+    const menuDropdownPanel = document.getElementById('menu-dropdown-panel');
+
+    if (btnOpenMenuDropdown && menuDropdownPanel) {
+      btnOpenMenuDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuDropdownPanel.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!menuDropdownPanel.contains(e.target) && e.target !== btnOpenMenuDropdown) {
+          menuDropdownPanel.classList.add('hidden');
+        }
+      });
+    }
+
+    // About & Guide Modal
+    const aboutModalOverlay = document.getElementById('about-modal-overlay');
+    const menuBtnAbout = document.getElementById('menu-btn-about');
+    const btnCloseAboutModal = document.getElementById('btn-close-about-modal');
+    const btnDoneAbout = document.getElementById('btn-done-about');
+
+    function openAboutModal() {
+      if (menuDropdownPanel) menuDropdownPanel.classList.add('hidden');
+      if (aboutModalOverlay) {
+        aboutModalOverlay.classList.remove('hidden');
+        aboutModalOverlay.classList.add('flex');
+      }
+    }
+
+    function closeAboutModal() {
+      if (aboutModalOverlay) {
+        aboutModalOverlay.classList.add('hidden');
+        aboutModalOverlay.classList.remove('flex');
+      }
+    }
+
+    if (menuBtnAbout) menuBtnAbout.addEventListener('click', openAboutModal);
+    if (btnCloseAboutModal) btnCloseAboutModal.addEventListener('click', closeAboutModal);
+    if (btnDoneAbout) btnDoneAbout.addEventListener('click', closeAboutModal);
+    if (aboutModalOverlay) {
+      aboutModalOverlay.addEventListener('click', e => {
+        if (e.target === aboutModalOverlay) closeAboutModal();
+      });
+    }
+
+    // Activity Log from menu
+    const menuBtnActivity = document.getElementById('menu-btn-activity');
+    if (menuBtnActivity) {
+      menuBtnActivity.addEventListener('click', () => {
+        if (menuDropdownPanel) menuDropdownPanel.classList.add('hidden');
+        openActivityModal();
+      });
+    }
+
+    // Network Lineage toggle from menu
+    const menuBtnToggleNetwork = document.getElementById('menu-btn-toggle-network');
+    if (menuBtnToggleNetwork) {
+      menuBtnToggleNetwork.addEventListener('click', () => {
+        isNetworkVisible = !isNetworkVisible;
+        if (networkToggleLabel) {
+          networkToggleLabel.textContent = isNetworkVisible ? 'ON' : 'OFF';
+          networkToggleLabel.className = isNetworkVisible
+            ? 'text-[10px] font-bold text-cyan bg-cyan/10 px-1.5 py-0.5 rounded'
+            : 'text-[10px] font-bold text-smoke/50 bg-gutter px-1.5 py-0.5 rounded';
+        }
+        renderGlobalNetwork();
+      });
+    }
+
+    // Admin Login Modal & Auth
+    const adminModalOverlay = document.getElementById('admin-modal-overlay');
+    const menuBtnAdmin = document.getElementById('menu-btn-admin');
+    const btnCloseAdminModal = document.getElementById('btn-close-admin-modal');
+    const btnCancelAdminModal = document.getElementById('btn-cancel-admin-modal');
+    const btnSubmitAdminLogin = document.getElementById('btn-submit-admin-login');
+    const adminPasswordInput = document.getElementById('admin-password-input');
+    const adminLoginError = document.getElementById('admin-login-error');
+
+    function openAdminModal() {
+      if (menuDropdownPanel) menuDropdownPanel.classList.add('hidden');
+      if (adminPasswordInput) adminPasswordInput.value = '';
+      if (adminLoginError) {
+        adminLoginError.classList.add('hidden');
+        adminLoginError.textContent = '';
+      }
+      if (adminModalOverlay) {
+        adminModalOverlay.classList.remove('hidden');
+        adminModalOverlay.classList.add('flex');
+        setTimeout(() => adminPasswordInput && adminPasswordInput.focus(), 80);
+      }
+    }
+
+    function closeAdminModal() {
+      if (adminModalOverlay) {
+        adminModalOverlay.classList.add('hidden');
+        adminModalOverlay.classList.remove('flex');
+      }
+    }
+
+    if (menuBtnAdmin) {
+      menuBtnAdmin.addEventListener('click', () => {
+        if (menuDropdownPanel) menuDropdownPanel.classList.add('hidden');
+        if (isAdminLoggedIn) {
+          // Log out
+          localStorage.removeItem('blackbook_admin_token');
+          isAdminLoggedIn = false;
+          updateAdminUI();
+          showToast('Admin logged out. Cloud & backup tools hidden.');
+        } else {
+          openAdminModal();
+        }
+      });
+    }
+
+    if (btnCloseAdminModal) btnCloseAdminModal.addEventListener('click', closeAdminModal);
+    if (btnCancelAdminModal) btnCancelAdminModal.addEventListener('click', closeAdminModal);
+    if (adminModalOverlay) {
+      adminModalOverlay.addEventListener('click', e => {
+        if (e.target === adminModalOverlay) closeAdminModal();
+      });
+    }
+
+    async function handleAdminLogin() {
+      const password = adminPasswordInput ? adminPasswordInput.value.trim() : '';
+      if (!password) {
+        if (adminLoginError) {
+          adminLoginError.textContent = 'Please enter the master admin password.';
+          adminLoginError.classList.remove('hidden');
+        }
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.ok && data.token) {
+          localStorage.setItem('blackbook_admin_token', data.token);
+          isAdminLoggedIn = true;
+          updateAdminUI();
+          closeAdminModal();
+          showToast('🔓 Admin access granted! Cloud & backup tools unlocked.');
+        } else {
+          if (adminLoginError) {
+            adminLoginError.textContent = data.error || 'Invalid password.';
+            adminLoginError.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        if (adminLoginError) {
+          adminLoginError.textContent = 'Unable to reach backend to verify password.';
+          adminLoginError.classList.remove('hidden');
+        }
+      }
+    }
+
+    if (btnSubmitAdminLogin) btnSubmitAdminLogin.addEventListener('click', handleAdminLogin);
+    if (adminPasswordInput) {
+      adminPasswordInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') handleAdminLogin();
+      });
+    }
+
+    // Check admin session on startup
+    verifyAdminSession();
+
     // ─── KEYBOARD SHORTCUTS ─────────────────────────────────
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        if (backupModalOverlay && !backupModalOverlay.classList.contains('hidden')) closeBackupModal();
+        if (aboutModalOverlay && !aboutModalOverlay.classList.contains('hidden')) closeAboutModal();
+        else if (adminModalOverlay && !adminModalOverlay.classList.contains('hidden')) closeAdminModal();
+        else if (backupModalOverlay && !backupModalOverlay.classList.contains('hidden')) closeBackupModal();
         else if (searchDropdownPanel && !searchDropdownPanel.classList.contains('hidden')) closeSearchDropdown();
         else if (activityModalOverlay && !activityModalOverlay.classList.contains('hidden')) closeActivityModal();
         else if (quickCrewModal && !quickCrewModal.classList.contains('hidden')) closeQuickCrewModal();
