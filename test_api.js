@@ -16,7 +16,7 @@ async function testHttpApi() {
   const health = await fetchJson('/api/health');
   assert.strictEqual(health.status, 200);
   assert.strictEqual(health.data.status, 'ok');
-  assert.strictEqual(health.data.database, 'blackbook.db');
+  assert(health.data.database.includes('SQLite'), 'Database should report SQLite');
   console.log('✓ GET /api/health responded 200 OK');
 
   // 2. Get all crews

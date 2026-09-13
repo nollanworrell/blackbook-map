@@ -3,6 +3,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const url = require('node:url');
 const {
+  getDbInfo,
+  initDb,
   getAllCrews,
   getCrewById,
   getCrewHistory,
@@ -15,13 +17,10 @@ const {
   getCachedGeocode,
   setCachedGeocode,
   getStats,
-  seedDefaults,
 } = require('./db.js');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const PUBLIC_DIR = __dirname;
-
-// Seed defaults handled by db.js
 
 /**
  * MIME type resolver for static files
@@ -43,7 +42,7 @@ const MIME_TYPES = {
  */
 async function geocodeCityWithCache(query) {
   if (!query) return null;
-  const cached = getCachedGeocode(query);
+  const cached = await getCachedGeocode(query);
   if (cached) {
     return cached;
   }
@@ -57,7 +56,7 @@ async function geocodeCityWithCache(query) {
     if (data && data.length > 0) {
       const lat = parseFloat(data[0].lat);
       const lng = parseFloat(data[0].lon);
-      setCachedGeocode(query, lat, lng);
+      await setCachedGeocode(query, lat, lng);
       return { lat, lng };
     }
   } catch (err) {
@@ -74,7 +73,7 @@ function parseJsonBody(req) {
     let body = '';
     req.on('data', chunk => {
       body += chunk;
-      if (body.length > 5 * 1024 * 1024) {
+      if (body.length > 10 * 1024 * 1024) {
         req.destroy();
         reject(new Error('Payload too large'));
       }
@@ -125,18 +124,20 @@ const server = http.createServer(async (req, res) => {
 
   // Healthcheck & DB Status
   if (pathname === '/api/health' && method === 'GET') {
+    const dbInfo = getDbInfo();
     return sendJson(200, {
       status: 'ok',
       timestamp: new Date().toISOString(),
-      database: 'blackbook.db',
-      mode: 'WAL',
+      database: dbInfo.type,
+      storage: dbInfo.storage,
+      isTurso: dbInfo.isTurso,
     });
   }
 
   // Get Stats
   if (pathname === '/api/stats' && method === 'GET') {
     try {
-      const stats = getStats();
+      const stats = await getStats();
       return sendJson(200, stats);
     } catch (err) {
       return sendError(500, err.message);
@@ -146,7 +147,7 @@ const server = http.createServer(async (req, res) => {
   // Export Full Blackbook
   if (pathname === '/api/export' && method === 'GET') {
     try {
-      const crews = getAllCrews();
+      const crews = await getAllCrews(true);
       res.setHeader('Content-Disposition', 'attachment; filename="blackbook_crews_export.json"');
       return sendJson(200, {
         exportedAt: new Date().toISOString(),
@@ -168,11 +169,15 @@ const server = http.createServer(async (req, res) => {
       }
       let importedCount = 0;
       for (const c of crewsList) {
-        upsertCrew(c);
-        importedCount++;
+        if (c && c.name && c.city) {
+          await upsertCrew(c, 'Import/Sync', 'Community backup sync');
+          importedCount++;
+        }
       }
+      console.log(`📥 Successfully imported/synced ${importedCount} crews into database.`);
       return sendJson(200, { success: true, count: importedCount });
     } catch (err) {
+      console.error('Import error:', err);
       return sendError(400, err.message);
     }
   }
@@ -181,7 +186,7 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/activity' && method === 'GET') {
     try {
       const limit = parseInt(parsedUrl.searchParams.get('limit') || '40', 10);
-      const activity = getGlobalActivity(limit);
+      const activity = await getGlobalActivity(limit);
       return sendJson(200, activity);
     } catch (err) {
       return sendError(500, err.message);
@@ -192,7 +197,7 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/crews' && method === 'GET') {
     try {
       const includeArchived = parsedUrl.searchParams.get('includeArchived') === 'true';
-      const crews = getAllCrews(includeArchived);
+      const crews = await getAllCrews(includeArchived);
       return sendJson(200, crews);
     } catch (err) {
       return sendError(500, err.message);
@@ -229,7 +234,8 @@ const server = http.createServer(async (req, res) => {
       };
 
       const summary = editSummary || `Quick-added crew & linked as ${role}`;
-      const created = upsertCrew(newCrewData, authorName || 'Anonymous', summary);
+      const created = await upsertCrew(newCrewData, authorName || 'Anonymous', summary);
+      console.log(`✨ [QUICK-ADD] Crew "${created.name}" (${created.city}) added by ${authorName || 'Anonymous'}`);
       return sendJson(201, created);
     } catch (err) {
       return sendError(400, err.message);
@@ -255,7 +261,8 @@ const server = http.createServer(async (req, res) => {
 
       const author = body.authorName || 'Anonymous';
       const summary = body.editSummary || (body.id ? 'Updated crew details & lineage' : 'Created new crew entry');
-      const saved = upsertCrew(body, author, summary);
+      const saved = await upsertCrew(body, author, summary);
+      console.log(`💾 [SAVE] Crew "${saved.name}" (${saved.city}) saved by ${author}`);
       return sendJson(201, saved);
     } catch (err) {
       return sendError(400, err.message);
@@ -267,7 +274,7 @@ const server = http.createServer(async (req, res) => {
   if (historyMatch && method === 'GET') {
     const crewId = historyMatch[1];
     try {
-      const history = getCrewHistory(crewId);
+      const history = await getCrewHistory(crewId);
       return sendJson(200, history);
     } catch (err) {
       return sendError(500, err.message);
@@ -282,7 +289,8 @@ const server = http.createServer(async (req, res) => {
     try {
       const body = await parseJsonBody(req);
       const author = body.authorName || 'Anonymous';
-      const rolledBack = rollbackCrew(crewId, revId, author);
+      const rolledBack = await rollbackCrew(crewId, revId, author);
+      console.log(`↺ [ROLLBACK] Crew "${rolledBack.name}" reverted to rev #${revId} by ${author}`);
       return sendJson(200, rolledBack);
     } catch (err) {
       return sendError(400, err.message);
@@ -296,7 +304,8 @@ const server = http.createServer(async (req, res) => {
     try {
       const body = await parseJsonBody(req);
       const author = body.authorName || 'Anonymous';
-      const restored = restoreCrew(crewId, author);
+      const restored = await restoreCrew(crewId, author);
+      console.log(`♻️ [RESTORE] Crew "${restored.name}" restored from archive by ${author}`);
       return sendJson(200, restored);
     } catch (err) {
       return sendError(400, err.message);
@@ -309,7 +318,7 @@ const server = http.createServer(async (req, res) => {
     const crewId = crewMatch[1];
 
     if (method === 'GET') {
-      const crew = getCrewById(crewId);
+      const crew = await getCrewById(crewId);
       if (!crew) return sendError(404, 'Crew not found');
       return sendJson(200, crew);
     }
@@ -320,7 +329,8 @@ const server = http.createServer(async (req, res) => {
         body.id = crewId;
         const author = body.authorName || 'Anonymous';
         const summary = body.editSummary || 'Updated crew details & lineage';
-        const updated = upsertCrew(body, author, summary);
+        const updated = await upsertCrew(body, author, summary);
+        console.log(`📝 [UPDATE] Crew "${updated.name}" updated by ${author}`);
         return sendJson(200, updated);
       } catch (err) {
         return sendError(400, err.message);
@@ -333,7 +343,8 @@ const server = http.createServer(async (req, res) => {
         try { body = await parseJsonBody(req); } catch (_) {}
         const reason = body.reason || parsedUrl.searchParams.get('reason') || 'Archived by community';
         const author = body.authorName || parsedUrl.searchParams.get('author') || 'Anonymous';
-        const result = archiveCrew(crewId, reason, author);
+        const result = await archiveCrew(crewId, reason, author);
+        console.log(`🗑️ [ARCHIVE] Crew ${crewId} archived by ${author} (Reason: ${reason})`);
         return sendJson(200, { ...result, deletedId: crewId });
       } catch (err) {
         const status = err.message.includes('locked') ? 403 : 500;
@@ -376,17 +387,24 @@ const server = http.createServer(async (req, res) => {
   sendError(404, 'Not Found');
 });
 
-server.listen(PORT, () => {
-  console.log(`
+// Ensure DB is initialized before listening
+initDb().then(() => {
+  const dbInfo = getDbInfo();
+  server.listen(PORT, () => {
+    console.log(`
 ╔═════════════════════════════════════════════════════════════════╗
 ║         THE BLACKBOOK MAP - BBOY CREW GENEALOGY BACKEND         ║
 ╠═════════════════════════════════════════════════════════════════╣
 ║  🌐 Web Application:  http://localhost:${PORT}                    ║
 ║  📡 REST API:         http://localhost:${PORT}/api/crews          ║
-║  💾 Database:         blackbook.db (SQLite WAL Mode)            ║
-║  📍 Geocode Cache:    Enabled & Persistent in SQLite            ║
+║  💾 Database:         ${dbInfo.type.padEnd(42)}║
+║  📍 Storage:          ${(dbInfo.isTurso ? dbInfo.storage : 'Local / Persistent Disk').padEnd(42)}║
 ╚═════════════════════════════════════════════════════════════════╝
-  `);
+    `);
+  });
+}).catch(err => {
+  console.error('Fatal database initialization error:', err);
+  process.exit(1);
 });
 
 module.exports = server;

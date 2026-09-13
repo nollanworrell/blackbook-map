@@ -524,6 +524,10 @@
         <span class="w-2 h-2 rounded-full bg-smoke/40 inline-block animate-pulse" id="backend-status-dot"></span>
         <span class="text-smoke/70" id="backend-status-text">Connecting…</span>
       </div>
+      <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-concrete border border-caution/30 text-caution font-mono text-xs hover:border-caution hover:bg-caution/10 transition-all min-h-[40px]" id="btn-open-backup" aria-label="Backup & Restore Blackbook Data">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span class="hidden sm:inline">Backup</span>
+      </button>
       <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-concrete border border-magenta/30 text-magenta font-mono text-xs hover:border-magenta hover:bg-magenta/10 transition-all min-h-[40px]" id="btn-open-activity" aria-label="Open Blackbook Changelog">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         <span class="hidden sm:inline">Changelog</span>
@@ -856,6 +860,55 @@
     </div>
   </div>
 
+  <!-- ════════════ BACKUP & RESTORE MODAL ════════════ -->
+  <div id="backup-modal-overlay" class="fixed inset-0 z-[2700] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-[#111] border border-cyan/30 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between border-b border-gutter pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">💾</span>
+          <div>
+            <h3 class="font-marker text-lg text-cyan glow-cyan tracking-wide">Blackbook Backup &amp; Sync</h3>
+            <p class="font-mono text-[11px] text-smoke">Never lose crew genealogy or lineage data</p>
+          </div>
+        </div>
+        <button id="btn-close-backup-modal" class="text-smoke hover:text-caution p-1 min-w-[36px] min-h-[36px] flex items-center justify-center" aria-label="Close backup modal">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="14" y2="14"/><line x1="14" y1="4" x2="4" y2="14"/></svg>
+        </button>
+      </div>
+
+      <!-- Cloud Status Box -->
+      <div class="p-3 rounded-lg bg-concrete border border-gutter text-xs font-mono space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-smoke">Database Engine:</span>
+          <span id="backup-db-type" class="text-cyan font-bold">Checking...</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-smoke">Active Crews Count:</span>
+          <span id="backup-crews-count" class="text-white font-bold">0</span>
+        </div>
+        <div class="flex items-center justify-between border-t border-gutter/40 pt-1.5">
+          <span class="text-smoke">Local Safety Cache:</span>
+          <span id="backup-local-cache-status" class="text-emerald-400 font-bold">Saved</span>
+        </div>
+      </div>
+
+      <div class="space-y-3 pt-1">
+        <button id="btn-download-backup" class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-gradient-to-r from-cyan to-cyan/80 text-asphalt font-mono font-bold text-xs hover:brightness-110 transition-all shadow-lg min-h-[44px]">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Backup JSON File
+        </button>
+
+        <label class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-concrete border border-magenta/40 text-magenta font-mono font-bold text-xs hover:bg-magenta/10 hover:border-magenta transition-all cursor-pointer min-h-[44px]">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import / Restore Backup JSON
+          <input type="file" id="input-import-file" accept=".json,application/json" class="hidden" />
+        </label>
+      </div>
+
+      <div id="backup-modal-msg" class="hidden font-mono text-xs text-center py-2 px-3 rounded-lg border"></div>
+    </div>
+  </div>
+
   <!-- ════════════ TOAST NOTIFICATION ════════════ -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[3000] bg-concrete border border-cyan/30 text-cyan font-mono text-sm px-5 py-3 rounded-lg box-glow-cyan opacity-0 pointer-events-none transition-opacity duration-300">
     Crew added to the map!
@@ -883,7 +936,7 @@
         lat: 47.6062,
         lng: -122.3321,
         year: 1999,
-        founders: ['J-Sun', 'Smilez', 'Jerome', 'Tim', 'Brysen', 'Thesis'],
+        founders: ['J-Sun', 'Smilez', 'Jerome', 'Tim', 'Brysen', 'Thesis', 'Bboy Gravity'],
         parentIds: [
           'crew_1789255058187',
           'crew_1789255084884',
@@ -1029,7 +1082,10 @@
       : 'http://localhost:3000';
     let isBackendOnline = false;
 
-    function updateBackendBadge(online) {
+    let backendDbInfo = null;
+
+    function updateBackendBadge(online, healthInfo = null) {
+      if (healthInfo) backendDbInfo = healthInfo;
       const badge = document.getElementById('backend-status-badge');
       const dot = document.getElementById('backend-status-dot');
       const text = document.getElementById('backend-status-text');
@@ -1037,28 +1093,88 @@
 
       if (online) {
         dot.className = 'w-2 h-2 rounded-full bg-cyan inline-block box-glow-cyan';
-        text.textContent = 'SQLite Connected';
-        text.className = 'text-cyan font-bold';
-        badge.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-cyan/30 bg-concrete/60 font-mono text-[11px] transition-all min-h-[44px]';
+        if (backendDbInfo && backendDbInfo.isTurso) {
+          text.textContent = '☁️ Turso Cloud';
+          text.className = 'text-cyan font-bold';
+          badge.title = 'Connected to Turso Cloud SQLite (Persistent 24/7)';
+        } else {
+          text.textContent = '💾 SQLite Local';
+          text.className = 'text-cyan font-bold';
+          badge.title = 'Connected to Local SQLite Database';
+        }
+        badge.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-cyan/30 bg-concrete/60 font-mono text-[11px] transition-all min-h-[40px]';
       } else {
         dot.className = 'w-2 h-2 rounded-full bg-caution inline-block box-glow-caution';
         text.textContent = 'Offline (Local)';
         text.className = 'text-smoke/70';
-        badge.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gutter bg-concrete/60 font-mono text-[11px] transition-all min-h-[44px]';
+        badge.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gutter bg-concrete/60 font-mono text-[11px] transition-all min-h-[40px]';
+        badge.title = 'Backend unreachable, operating from browser storage';
       }
     }
 
     async function checkAndSyncBackend() {
       try {
+        // 1. Health check to detect database type (Turso Cloud vs Local SQLite)
+        try {
+          const hRes = await fetch(`${API_BASE}/api/health`, {
+            signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(3000) : undefined,
+          });
+          if (hRes.ok) {
+            backendDbInfo = await hRes.json();
+          }
+        } catch (_) {}
+
+        // 2. Fetch active crews from server
         const res = await fetch(`${API_BASE}/api/crews`, {
-          signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(2000) : undefined,
+          signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(4000) : undefined,
         });
+
         if (res.ok) {
           const apiCrews = await res.json();
-          if (Array.isArray(apiCrews) && apiCrews.length > 0) {
+          if (Array.isArray(apiCrews)) {
             isBackendOnline = true;
-            updateBackendBadge(true);
-            crews = apiCrews;
+            updateBackendBadge(true, backendDbInfo);
+
+            // 🛡️ SELF-HEALING TWO-WAY RECONCILIATION:
+            // Check if local storage has crews missing on the server (e.g., from container resets or offline adds)
+            const localCrews = loadCrews();
+            const serverIds = new Set(apiCrews.map(c => c.id));
+            const missingOnServer = localCrews.filter(c => c && c.id && !serverIds.has(c.id));
+
+            if (missingOnServer.length > 0) {
+              console.warn(`🛡️ Detected ${missingOnServer.length} locally saved crew(s) missing on backend. Auto-healing to server...`, missingOnServer);
+              try {
+                const healRes = await fetch(`${API_BASE}/api/import`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(missingOnServer),
+                });
+                if (healRes.ok) {
+                  console.log('✅ Auto-healed missing crews into backend database!');
+                  const refreshedRes = await fetch(`${API_BASE}/api/crews`);
+                  if (refreshedRes.ok) {
+                    const refreshedCrews = await refreshedRes.json();
+                    if (Array.isArray(refreshedCrews) && refreshedCrews.length > 0) {
+                      crews = refreshedCrews;
+                      saveCrewsToStorage();
+                      renderMarkers();
+                      return;
+                    }
+                  }
+                }
+              } catch (healErr) {
+                console.warn('Auto-healing push failed:', healErr);
+              }
+            }
+
+            // Merge local and server crews to prevent accidental data loss
+            const mergedMap = new Map();
+            for (const c of apiCrews) mergedMap.set(c.id, c);
+            for (const c of missingOnServer) {
+              if (!mergedMap.has(c.id)) mergedMap.set(c.id, c);
+            }
+
+            crews = Array.from(mergedMap.values());
             saveCrewsToStorage();
             renderMarkers();
             return;
@@ -1094,7 +1210,11 @@
 
     function saveCrewsToStorage() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(crews));
+        const raw = JSON.stringify(crews);
+        localStorage.setItem(STORAGE_KEY, raw);
+        // Rolling safety backup with timestamp
+        localStorage.setItem('blackbook_crews_backup', raw);
+        localStorage.setItem('blackbook_crews_backup_time', new Date().toISOString());
       } catch (err) {
         console.warn('Could not save crews to localStorage:', err);
       }
@@ -3023,10 +3143,175 @@
       }
     });
 
+    // ─── BLACKBOOK BACKUP & RESTORE MODAL ───────────────────
+    const backupModalOverlay = document.getElementById('backup-modal-overlay');
+    const btnOpenBackup = document.getElementById('btn-open-backup');
+    const btnCloseBackupModal = document.getElementById('btn-close-backup-modal');
+    const btnDownloadBackup = document.getElementById('btn-download-backup');
+    const inputImportFile = document.getElementById('input-import-file');
+    const backupDbType = document.getElementById('backup-db-type');
+    const backupCrewsCount = document.getElementById('backup-crews-count');
+    const backupLocalCacheStatus = document.getElementById('backup-local-cache-status');
+    const backupModalMsg = document.getElementById('backup-modal-msg');
+
+    function openBackupModal() {
+      if (!backupModalOverlay) return;
+      backupModalOverlay.classList.remove('hidden');
+      backupModalOverlay.classList.add('flex');
+
+      if (backupCrewsCount) backupCrewsCount.textContent = `${crews.length} crews loaded`;
+      if (backupDbType) {
+        if (backendDbInfo && backendDbInfo.isTurso) {
+          backupDbType.textContent = '☁️ Turso Cloud SQLite (Persistent 24/7)';
+          backupDbType.className = 'text-cyan font-bold';
+        } else if (isBackendOnline) {
+          backupDbType.textContent = '💾 Local SQLite (Container)';
+          backupDbType.className = 'text-caution font-bold';
+        } else {
+          backupDbType.textContent = 'Offline / Browser Storage';
+          backupDbType.className = 'text-smoke/70';
+        }
+      }
+      if (backupLocalCacheStatus) {
+        const lastBackupTime = localStorage.getItem('blackbook_crews_backup_time');
+        backupLocalCacheStatus.textContent = lastBackupTime
+          ? 'Active (' + new Date(lastBackupTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ')'
+          : 'Active';
+      }
+      if (backupModalMsg) {
+        backupModalMsg.className = 'hidden font-mono text-xs text-center py-2 px-3 rounded-lg border';
+        backupModalMsg.textContent = '';
+      }
+    }
+
+    function closeBackupModal() {
+      if (!backupModalOverlay) return;
+      backupModalOverlay.classList.add('hidden');
+      backupModalOverlay.classList.remove('flex');
+    }
+
+    if (btnOpenBackup) btnOpenBackup.addEventListener('click', openBackupModal);
+    if (btnCloseBackupModal) btnCloseBackupModal.addEventListener('click', closeBackupModal);
+    if (backupModalOverlay) {
+      backupModalOverlay.addEventListener('click', e => {
+        if (e.target === backupModalOverlay) closeBackupModal();
+      });
+    }
+
+    // Export Backup
+    if (btnDownloadBackup) {
+      btnDownloadBackup.addEventListener('click', async () => {
+        try {
+          let exportData = null;
+          if (isBackendOnline) {
+            try {
+              const res = await fetch(`${API_BASE}/api/export`);
+              if (res.ok) {
+                exportData = await res.json();
+              }
+            } catch (_) {}
+          }
+
+          if (!exportData) {
+            exportData = {
+              exportedAt: new Date().toISOString(),
+              totalCrews: crews.length,
+              crews: crews,
+            };
+          }
+
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const dateStr = new Date().toISOString().slice(0, 10);
+          a.href = url;
+          a.download = `blackbook_crews_backup_${dateStr}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          if (backupModalMsg) {
+            backupModalMsg.className = 'block font-mono text-xs text-center py-2 px-3 rounded-lg border border-cyan/40 bg-cyan/10 text-cyan';
+            backupModalMsg.textContent = `✅ Exported ${exportData.totalCrews || exportData.crews.length} crews to JSON backup!`;
+          }
+          showToast('Backup JSON downloaded successfully!');
+        } catch (err) {
+          if (backupModalMsg) {
+            backupModalMsg.className = 'block font-mono text-xs text-center py-2 px-3 rounded-lg border border-magenta/40 bg-magenta/10 text-magenta';
+            backupModalMsg.textContent = `Export failed: ${err.message}`;
+          }
+        }
+      });
+    }
+
+    // Import Backup
+    if (inputImportFile) {
+      inputImportFile.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        try {
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          const crewsToImport = Array.isArray(parsed) ? parsed : parsed.crews;
+
+          if (!Array.isArray(crewsToImport) || crewsToImport.length === 0) {
+            throw new Error('No valid crew array found in JSON file.');
+          }
+
+          if (backupModalMsg) {
+            backupModalMsg.className = 'block font-mono text-xs text-center py-2 px-3 rounded-lg border border-caution/40 bg-caution/10 text-caution';
+            backupModalMsg.textContent = `Importing ${crewsToImport.length} crews...`;
+          }
+
+          // If backend is online, sync to backend
+          if (isBackendOnline) {
+            const res = await fetch(`${API_BASE}/api/import`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(crewsToImport),
+            });
+            if (!res.ok) {
+              const errJson = await res.json();
+              throw new Error(errJson.error || 'Server import failed');
+            }
+            const refreshRes = await fetch(`${API_BASE}/api/crews`);
+            if (refreshRes.ok) {
+              crews = await refreshRes.json();
+            }
+          } else {
+            const map = new Map();
+            for (const c of crews) map.set(c.id, c);
+            for (const c of crewsToImport) map.set(c.id, c);
+            crews = Array.from(map.values());
+          }
+
+          saveCrewsToStorage();
+          renderMarkers();
+
+          if (backupCrewsCount) backupCrewsCount.textContent = `${crews.length} crews loaded`;
+          if (backupModalMsg) {
+            backupModalMsg.className = 'block font-mono text-xs text-center py-2 px-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-emerald-400';
+            backupModalMsg.textContent = `✅ Successfully imported ${crewsToImport.length} crews!`;
+          }
+          showToast(`Successfully imported ${crewsToImport.length} crews!`);
+        } catch (err) {
+          if (backupModalMsg) {
+            backupModalMsg.className = 'block font-mono text-xs text-center py-2 px-3 rounded-lg border border-magenta/40 bg-magenta/10 text-magenta';
+            backupModalMsg.textContent = `Import failed: ${err.message}`;
+          }
+        } finally {
+          inputImportFile.value = '';
+        }
+      });
+    }
+
     // ─── KEYBOARD SHORTCUTS ─────────────────────────────────
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        if (searchDropdownPanel && !searchDropdownPanel.classList.contains('hidden')) closeSearchDropdown();
+        if (backupModalOverlay && !backupModalOverlay.classList.contains('hidden')) closeBackupModal();
+        else if (searchDropdownPanel && !searchDropdownPanel.classList.contains('hidden')) closeSearchDropdown();
         else if (activityModalOverlay && !activityModalOverlay.classList.contains('hidden')) closeActivityModal();
         else if (quickCrewModal && !quickCrewModal.classList.contains('hidden')) closeQuickCrewModal();
         else if (deleteModalOverlay && !deleteModalOverlay.classList.contains('hidden')) closeDeleteModal();
