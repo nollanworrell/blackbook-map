@@ -1,6 +1,6 @@
 {
   "name": "bboy-crew-genealogy-map",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "Bboy Crew Genealogy Map (The Blackbook Map) Backend & Frontend",
   "main": "server.js",
   "scripts": {
