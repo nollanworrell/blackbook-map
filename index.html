@@ -529,10 +529,6 @@
         <span class="hidden sm:inline">Changelog</span>
         <span class="sm:hidden">Log</span>
       </button>
-      <button class="hidden lg:flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-concrete border border-gutter text-smoke/70 hover:text-white hover:border-smoke font-mono text-[11px] transition-all min-h-[40px]" id="btn-reset-data" title="Reset map back to default demo crews" aria-label="Reset to demo data">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 4v5h5"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 9"/></svg>
-        <span>Reset</span>
-      </button>
       <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-concrete border border-cyan/30 text-cyan font-mono text-xs hover:border-cyan hover:bg-cyan/10 transition-all min-h-[40px]" id="btn-toggle-network" aria-label="Toggle network lines">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><line x1="8.5" y1="7" x2="15.5" y2="7"/><line x1="7.5" y1="8.5" x2="10.5" y2="15.5"/><line x1="16.5" y1="8.5" x2="13.5" y2="15.5"/></svg>
         <span class="hidden md:inline">Graph:</span>
@@ -879,23 +875,7 @@
     const GAS_ENDPOINT = '';  // e.g. 'https://script.google.com/macros/s/XXXX/exec'
 
     // ─── SAMPLE DATA ────────────────────────────────────────
-    // Demo crews — in production this comes from GAS doGet()
     const SAMPLE_CREWS = [
-      {
-        id: 'rsc',
-        name: 'Rock Steady Crew',
-        city: 'New York, USA',
-        lat: 40.7128,
-        lng: -74.0060,
-        year: 1977,
-        founders: ['Crazy Legs', 'Frosty Freeze', 'Ken Swift'],
-        parentIds: [],
-        childIds: ['nycc', 'fc', 'sdc', 'rmn', 'massive_monkees'],
-        instagram: '@rocksteadycrew',
-        email: '',
-        phone: '',
-        website: 'https://rocksteadycrew.com',
-      },
       {
         id: 'massive_monkees',
         name: 'Massive Monkees',
@@ -904,7 +884,14 @@
         lng: -122.3321,
         year: 1999,
         founders: ['J-Sun', 'Smilez', 'Jerome', 'Tim', 'Brysen', 'Thesis'],
-        parentIds: ['rsc'],
+        parentIds: [
+          'crew_1789255058187',
+          'crew_1789255084884',
+          'crew_1789255464998',
+          'crew_1789255481268',
+          'crew_1789255900456',
+          'crew_1789255952058'
+        ],
         childIds: [],
         instagram: '@massivemonkees',
         email: 'info@massivemonkees.com',
@@ -912,166 +899,121 @@
         website: 'https://massivemonkees.com',
       },
       {
-        id: 'nycc',
-        name: 'NYC Breakers',
-        city: 'New York, USA',
-        lat: 40.7308,
-        lng: -73.9973,
-        year: 1983,
-        founders: ['Mr. Wave', 'Flip Rock', 'Glide Master'],
-        parentIds: ['rsc'],
-        childIds: [],
-        instagram: '@nycbreakers',
+        id: 'crew_1789255058187',
+        name: 'Universal Style Monkees',
+        city: 'Seattle, USA',
+        lat: 47.6038321,
+        lng: -122.330062,
+        year: null,
+        founders: [],
+        parentIds: [],
+        childIds: ['massive_monkees'],
+        instagram: '',
         email: '',
         phone: '',
         website: '',
       },
       {
-        id: 'fc',
-        name: 'Floor Gangz',
-        city: 'Paris, France',
-        lat: 48.8566,
-        lng: 2.3522,
+        id: 'crew_1789255084884',
+        name: 'MASSIVE',
+        city: 'Seattle',
+        lat: 47.6038321,
+        lng: -122.330062,
         year: 1999,
-        founders: ['Lilou', 'Kareem'],
-        parentIds: ['rsc', 'vagabonds'],
-        childIds: ['rmn'],
-        instagram: '@floorgangz',
-        email: 'contact@floorgangz.fr',
-        phone: '',
-        website: '',
-      },
-      {
-        id: 'vagabonds',
-        name: 'Vagabonds',
-        city: 'Paris, France',
-        lat: 48.8700,
-        lng: 2.3400,
-        year: 2000,
-        founders: ['Junior', 'Brahim'],
+        founders: [],
         parentIds: [],
-        childIds: ['fc', 'rmn'],
-        instagram: '@vagabondscrew',
+        childIds: ['massive_monkees'],
+        instagram: '',
         email: '',
         phone: '',
         website: '',
       },
       {
-        id: 'gkd',
-        name: 'Gamblerz',
-        city: 'Seoul, South Korea',
-        lat: 37.5665,
-        lng: 126.9780,
-        year: 2002,
-        founders: ['Wing', 'Skim', 'Vero'],
+        id: 'crew_1789255464998',
+        name: 'Premier Crew',
+        city: 'Everett, WA',
+        lat: 47.9793437,
+        lng: -122.2127011,
+        year: null,
+        founders: [],
         parentIds: [],
-        childIds: ['jks', 'rmn'],
-        instagram: '@gamblerzcrew',
+        childIds: ['crew_1789255550302', 'massive_monkees'],
+        instagram: '',
         email: '',
         phone: '',
         website: '',
       },
       {
-        id: 'jks',
-        name: 'Jinjo Crew',
-        city: 'Seoul, South Korea',
-        lat: 37.5500,
-        lng: 127.0000,
-        year: 2001,
-        founders: ['Nico', 'Born'],
-        parentIds: ['gkd'],
-        childIds: [],
-        instagram: '@jinjocrew',
-        email: 'jinjo@crew.kr',
-        phone: '',
-        website: 'https://jinjocrew.com',
-      },
-      {
-        id: 'mzk',
-        name: 'MZK Crew',
-        city: 'Osaka, Japan',
-        lat: 34.6937,
-        lng: 135.5023,
-        year: 1998,
-        founders: ['Taisuke', 'Nori'],
+        id: 'crew_1789255481268',
+        name: 'Mad Flava',
+        city: 'Bellevue, USA',
+        lat: 47.6144219,
+        lng: -122.192337,
+        year: null,
+        founders: [],
         parentIds: [],
-        childIds: ['bbl'],
-        instagram: '@mzkcrew',
+        childIds: ['crew_1789255672502', 'massive_monkees'],
+        instagram: '',
         email: '',
         phone: '',
         website: '',
       },
       {
-        id: 'bbl',
-        name: 'Body Carnival',
-        city: 'Tokyo, Japan',
-        lat: 35.6762,
-        lng: 139.6503,
-        year: 2003,
-        founders: ['Katsu One', 'Taisuke'],
-        parentIds: ['mzk'],
+        id: 'crew_1789255550302',
+        name: 'Floor Hogs',
+        city: 'Shoreline, WA',
+        lat: 47.7564667,
+        lng: -122.3437497,
+        year: null,
+        founders: [],
+        parentIds: ['crew_1789255464998'],
         childIds: [],
-        instagram: '@bodycarnival',
-        email: 'bodycarnival@dance.jp',
-        phone: '',
-        website: '',
-      },
-      {
-        id: 'sdc',
-        name: 'Supernaturalz',
-        city: 'Toronto, Canada',
-        lat: 43.6532,
-        lng: -79.3832,
-        year: 2000,
-        founders: ['Dyzee', 'El Nino'],
-        parentIds: ['rsc'],
-        childIds: [],
-        instagram: '@supernaturalz',
-        email: 'info@supernaturalz.ca',
-        phone: '',
-        website: '',
-      },
-      {
-        id: 'squadron',
-        name: 'Squadron',
-        city: 'São Paulo, Brazil',
-        lat: -23.5505,
-        lng: -46.6333,
-        year: 2005,
-        founders: ['Neguin', 'Pelezinho'],
-        parentIds: [],
-        childIds: ['rmn'],
-        instagram: '@squadroncrew',
-        email: 'contato@squadron.br',
-        phone: '',
-        website: '',
-      },
-      {
-        id: 'rmn',
-        name: 'Red Bull BC One All Stars',
-        city: 'Global',
-        lat: 47.3769,
-        lng: 8.5417,
-        year: 2011,
-        founders: ['Various'],
-        parentIds: ['rsc', 'fc', 'gkd', 'squadron', 'vagabonds'],
-        childIds: [],
-        instagram: '@redbullbcone',
+        instagram: '',
         email: '',
         phone: '',
-        website: 'https://redbullbcone.com',
+        website: '',
       },
       {
-        id: 'predatorz',
-        name: 'Predatorz',
-        city: 'Moscow, Russia',
-        lat: 55.7558,
-        lng: 37.6173,
-        year: 2003,
-        founders: ['Alkolil', 'Bumblebee'],
-        parentIds: [],
+        id: 'crew_1789255672502',
+        name: 'Battle Reflex',
+        city: 'Bellevue, WA',
+        lat: 47.6144219,
+        lng: -122.192337,
+        year: null,
+        founders: [],
+        parentIds: ['crew_1789255481268'],
         childIds: [],
-        instagram: '@predatorzcrew',
+        instagram: '',
+        email: '',
+        phone: '',
+        website: '',
+      },
+      {
+        id: 'crew_1789255900456',
+        name: 'BOSS',
+        city: 'Seattle, WA',
+        lat: 47.6062,
+        lng: -122.3321,
+        year: null,
+        founders: [],
+        parentIds: [],
+        childIds: ['massive_monkees'],
+        instagram: '',
+        email: '',
+        phone: '',
+        website: '',
+      },
+      {
+        id: 'crew_1789255952058',
+        name: 'DVS',
+        city: 'Seattle, WA',
+        lat: 47.6062,
+        lng: -122.3321,
+        year: null,
+        founders: [],
+        parentIds: [],
+        childIds: ['massive_monkees'],
+        instagram: '',
         email: '',
         phone: '',
         website: '',
@@ -1079,7 +1021,7 @@
     ];
 
     // ─── LOCAL STORAGE PERSISTENCE ──────────────────────────
-    const STORAGE_KEY = 'blackbook_crews_data_v1';
+    const STORAGE_KEY = 'blackbook_crews_data_v2';
 
     // ─── BACKEND API CONFIGURATION ──────────────────────────
     const API_BASE = window.location.protocol.startsWith('http')
@@ -1221,32 +1163,6 @@
           networkToggleLabel.className = isNetworkVisible ? 'font-bold text-white' : 'font-bold text-smoke/50';
         }
         renderGlobalNetwork();
-      });
-    }
-
-    // Reset demo data button
-    const btnResetData = document.getElementById('btn-reset-data');
-    if (btnResetData) {
-      btnResetData.addEventListener('click', async () => {
-        if (confirm('Reset all crews back to the default Blackbook demo data? Any custom crews or edits will be replaced.')) {
-          localStorage.removeItem(STORAGE_KEY);
-          if (isBackendOnline) {
-            try {
-              await fetch(`${API_BASE}/api/import`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(SAMPLE_CREWS),
-              });
-            } catch (e) {
-              console.warn('Backend reset sync failed:', e);
-            }
-          }
-          crews = [...SAMPLE_CREWS];
-          saveCrewsToStorage();
-          renderMarkers();
-          closeDetailPanel();
-          showToast('Reset to default demo crews.');
-        }
       });
     }
 

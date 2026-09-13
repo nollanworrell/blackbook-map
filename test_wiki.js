@@ -14,7 +14,7 @@ console.log('🧪 Starting Wikipedia-Style Revision & Self-Governance Tests...\n
 
 // 1. Check existing crews and revisions
 const crews = getAllCrews();
-assert(crews.length >= 10, 'Should have active crews');
+assert(crews.length >= 9, 'Should have active crews');
 console.log(`✓ Active crews: ${crews.length}`);
 
 // 2. Test editing Massive Monkees with an author moniker & edit summary
@@ -65,13 +65,13 @@ const activeAfterRestore = getAllCrews(false);
 assert(activeAfterRestore.some(c => c.id === 'grief_target'), 'Restored crew should reappear on active map');
 console.log('✓ Un-archiving / restoration verified.');
 
-// 7. Test Protected Root (RSC cannot be deleted)
+// 7. Test Protected Root (Massive Monkees cannot be deleted)
 try {
-  archiveCrew('rsc', 'Accidental delete', 'Griefer');
+  archiveCrew('massive_monkees', 'Accidental delete', 'Griefer');
   assert.fail('Should not be able to archive locked crew');
 } catch (err) {
   assert(err.message.includes('locked'), 'Expected locked error');
-  console.log('✓ Protected foundation roots (RSC) cannot be archived.');
+  console.log('✓ Protected foundation roots (Massive Monkees) cannot be archived.');
 }
 
 // 8. Test Global Activity Feed

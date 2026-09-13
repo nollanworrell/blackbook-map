@@ -22,13 +22,13 @@ async function testHttpApi() {
   // 2. Get all crews
   const crewsRes = await fetchJson('/api/crews');
   assert.strictEqual(crewsRes.status, 200);
-  assert(Array.isArray(crewsRes.data) && crewsRes.data.length >= 13);
+  assert(Array.isArray(crewsRes.data) && crewsRes.data.length >= 9);
   console.log(`✓ GET /api/crews returned ${crewsRes.data.length} crews`);
 
   // 3. Stats
   const statsRes = await fetchJson('/api/stats');
   assert.strictEqual(statsRes.status, 200);
-  assert(statsRes.data.totalCrews >= 13);
+  assert(statsRes.data.totalCrews >= 9);
   console.log(`✓ GET /api/stats returned ${statsRes.data.totalCrews} crews`);
 
   // 4. Create Crew via POST
@@ -38,7 +38,7 @@ async function testHttpApi() {
     city: 'Los Angeles, USA',
     year: 2010,
     founders: ['Poe One'],
-    parentIds: ['rsc'],
+    parentIds: ['massive_monkees'],
     childIds: [],
     instagram: '@apibattle',
   };
@@ -62,9 +62,9 @@ async function testHttpApi() {
   console.log('✓ DELETE /api/crews/:id archived crew with community reason & author');
 
   // 6. Root crew deletion protection (403 Forbidden)
-  const lockedDeleteRes = await fetchJson('/api/crews/rsc', { method: 'DELETE' });
+  const lockedDeleteRes = await fetchJson('/api/crews/massive_monkees', { method: 'DELETE' });
   assert.strictEqual(lockedDeleteRes.status, 403);
-  console.log('✓ DELETE /api/crews/rsc blocked with 403 (Protected root)');
+  console.log('✓ DELETE /api/crews/massive_monkees blocked with 403 (Protected root)');
 
   // 7. Global Activity Feed
   const activityRes = await fetchJson('/api/activity?limit=10');
